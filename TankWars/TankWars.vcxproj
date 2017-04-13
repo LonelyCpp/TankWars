@@ -145,20 +145,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="EndGame.cpp" />
     <ClCompile Include="FillBar.cpp" />
     <ClCompile Include="introCut.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="mainMenu.cpp" />
     <ClCompile Include="Tank.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Weapon.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="color.h" />
+    <ClInclude Include="EndGame.h" />
     <ClInclude Include="FillBar.h" />
     <ClInclude Include="introCut.h" />
+    <ClInclude Include="mainMenu.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Tank.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="Weapon.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="TankWars.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

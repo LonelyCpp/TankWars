@@ -3,12 +3,16 @@
 #include <math.h>
 #include <Windows.h>
 #include <mmsystem.h>
+#include <string>
+
 #include "color.h"
 #include "Weapon.h"
 #include "Tank.h"
 #include "Terrain.h"
 #include "FillBar.h"
 #include "introCut.h"
+#include "mainMenu.h"
+#include "EndGame.h"
 
 void display();
 void changeSize(int w, int h);
@@ -26,7 +30,8 @@ namespace gameGlobals {
 	float time = 0;
 	bool turn = 0;	
 	int selectedPower = 100;
-	Color backColor = { 255, 133, 82 };
+	int winner = -1;
+	Color backColor = { 255, 255, 255 };
 }
 
 
@@ -41,8 +46,8 @@ int main(int argc, char **argv)
 	
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
-	glutInitWindowPosition(400, 100);
-	glutInitWindowSize(500, 500);
+	glutInitWindowPosition(0, 0);
+	glutInitWindowSize(1920, 1000);
 	glutCreateWindow("Tank Wars");
 
 	//-- My Init --
@@ -62,7 +67,7 @@ int main(int argc, char **argv)
 	gameGlobals::state = SELECT_ANGLE;
 
 	glutDisplayFunc(display);
-	glutReshapeFunc(changeSize);
+	//glutReshapeFunc(changeSize);
 	
 	
 
@@ -78,17 +83,36 @@ void display()
 	glutSwapBuffers();
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	if (IntroCut::isDone())
-		gameGlobals::gamePart = PLAY_GAME;
+	if (gameGlobals::gamePart != END_GAME)
+	{
+		if (IntroCut::isDone())
+			gameGlobals::gamePart = MAIN_MENU;
+		if (MainMenu::isDone())
+			gameGlobals::gamePart = PLAY_GAME;
+	}
+
 
 	if (gameGlobals::gamePart == INTRO_CUT)
 	{		
+		gameGlobals::backColor = { 255, 255, 255};
 		IntroCut::display();
 	}
-	else
+	else if (gameGlobals::gamePart == MAIN_MENU)
+	{
+		glutReshapeFunc(changeSize);
+
+		gameGlobals::backColor = { 0, 0, 0 };
+		glutPassiveMotionFunc(MainMenu::mouseMove);
+		glutMouseFunc(MainMenu::mouseClick);
+		MainMenu::display();
+	}
+	else if(gameGlobals::gamePart == PLAY_GAME)
 	{
 		glPointSize(1);
 		glLineWidth(1);
+
+		gameGlobals::backColor = { 255, 133, 82 };
+
 		glClearColor(gameGlobals::backColor.r / 255.0, gameGlobals::backColor.g / 255.0, gameGlobals::backColor.b / 255.0, 0);
 		glutPassiveMotionFunc(mouseMove);
 		glutMouseFunc(mouseClick);
@@ -98,6 +122,27 @@ void display()
 		tank[0].draw(true);
 		tank[1].draw(true);
 
+		glutSwapBuffers();
+	}
+	else if (gameGlobals::gamePart == END_GAME)
+	{
+		glClearColor(gameGlobals::backColor.r / 255.0, gameGlobals::backColor.g / 255.0, gameGlobals::backColor.b / 255.0, 0);
+
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		gluOrtho2D(-1, 1, -1, 1);
+
+		endgame::display();
+
+		MainMenu::RenderString1(-0.25, -0.7, "GAME OVER", 0.05);
+		if(gameGlobals::winner == 1)
+			MainMenu::RenderString1(-0.35, -0.9, "PLAYER 1 WINS!", 0.05);
+		else
+			MainMenu::RenderString1(-0.35, -0.9, "PLAYER 2 WINS!", 0.05);
+
+
+		glutPassiveMotionFunc(NULL);
+		glutMouseFunc(NULL);
 		glutSwapBuffers();
 	}
 	
@@ -131,17 +176,21 @@ void WeaponDriver(int t)
 		}
 		else
 		{
+			if (tank[0].isDead())
+				gameGlobals::winner = 2;
+			else if (tank[1].isDead())
+				gameGlobals::winner = 1;
+			if(gameGlobals::winner != -1)
+			{
+				std::cout << "died";
+				gameGlobals::gamePart = END_GAME;
+				glutPostRedisplay();
+			}
+				
+
 			PlaySound(TEXT("explode.wav"), NULL, SND_ASYNC);
 			basicBomb->explodeAnime(gameGlobals::time);
 			glutSwapBuffers();
-
-			/*
-			basicBomb->erase(gameGlobals::time);
-			basicBomb->erase(gameGlobals::time - 0.1);
-			glutSwapBuffers();
-			basicBomb->erase(gameGlobals::time - 0.1);
-			basicBomb->erase(gameGlobals::time);
-			*/
 
 			delete basicBomb;
 			basicBomb = NULL;
@@ -224,4 +273,3 @@ void changeSize(int w, int h)
 	gluOrtho2D(0.0, w, h, 0.0);
 
 }
-

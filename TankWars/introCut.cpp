@@ -441,6 +441,7 @@ void IntroCut::animate(int t)
 
 void IntroCut::display()
 {
+
 	PlaySound(TEXT("starwars.wav"), NULL, SND_ASYNC);
 	glutTimerFunc(20, animate, 0);
 }

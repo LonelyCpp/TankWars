@@ -170,7 +170,7 @@ bool Tank::didHit(int checkX, int checkY)
 	if (checkX > hitBox.botx && checkX < hitBox.topx)
 		if (checkY < hitBox.boty && checkY > hitBox.topy)
 		{
-			health -= 30;
+			health -= 60;
 			healthBar.setFill(health);
 			return true;
 		}

@@ -35,5 +35,7 @@ public:
 
 	void updateAngle(int mouseX, int mouseY);
 
+	bool isDead() { return health < 0; }
+
 	Weapon* createWeapon(int power = 120);
 };
